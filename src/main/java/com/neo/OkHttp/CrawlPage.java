@@ -3,6 +3,7 @@ package com.neo.OkHttp;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.*;
+import com.gargoylesoftware.htmlunit.util.Cookie;
 import com.neo.dataHandle.StringUnit;
 import com.neo.dataHandle.TableData;
 import com.neo.dataHandle.TableHandle;
@@ -15,54 +16,65 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class CrawlPage {
 
     @Autowired
-
     TableHandle tableHandle = new TableHandle();
-
     /**
      * 功能描述：抓取页面时不解析页面的js
      *
      * @param url
      * @throws Exception
      */
-    public List<TimeTable> crawlPageWithoutAnalyseJs(String url, String id, String mpassword) throws Exception {
+    public List<TimeTable> crawlPageWithoutAnalyseJs(String url, String id, String mpassword, Set<Cookie> cookie) throws Exception {
         List<TimeTable> timeTables = new ArrayList<TimeTable>();
-        try {
-            WebClient webClient = new WebClient(BrowserVersion.CHROME);
-            webClient.getOptions().setJavaScriptEnabled(true);
-            webClient.getOptions().setCssEnabled(false);
-            webClient.getOptions().setRedirectEnabled(true);
-            webClient.getOptions().setThrowExceptionOnScriptError(false);
-            webClient.getOptions().setTimeout(800);
-            webClient.getCookieManager().setCookiesEnabled(true);
-            HtmlPage page = webClient.getPage(url);
-            HtmlForm form = page.getFormByName("loginForm");
-            final HtmlSubmitInput button = form.getInputByName("submitBtn");
-            HtmlTextInput username = (HtmlTextInput) form.getInputByName("username");
-            HtmlPasswordInput password = (HtmlPasswordInput) form.getInputByName("password");
-            username.setValueAttribute(id);
-            password.setValueAttribute(mpassword);
-            HtmlPage retPage = (HtmlPage) button.click();
-            webClient.waitForBackgroundJavaScript(100);
-            System.out.println(retPage.asXml());
-            HtmlPage page1 = webClient.getPage("http://score.xaau.edu.cn/eams/courseTableForStd.action");
-            webClient.waitForBackgroundJavaScript(100);
-            System.out.println(page1.asXml());
-            HtmlPage page2 = webClient.getPage("http://score.xaau.edu.cn/eams/home.action");
-            webClient.waitForBackgroundJavaScript(100);
-            System.out.println(page2.asXml());
-            webClient.close();
-            System.out.println("lttttt*************************************************");
-            String TableHtml = page1.asXml();
-            String userHtml = page2.asXml();
-            timeTables = dataHandle(TableHtml, userHtml);  //解析数据
-        } catch (Exception e) {
-            System.out.println("爬取课表异常");
-            System.err.println("Exception: " + e);
+        WebClient webClient = new WebClient(BrowserVersion.CHROME);
+        webClient.getCookieManager().setCookiesEnabled(true);
+        if (cookie != null) {
+            for (Cookie s:cookie) {
+            webClient.getCookieManager().addCookie(s);
+            }
+            cookie = null;
         }
+        webClient.getOptions().setJavaScriptEnabled(true);
+        webClient.getOptions().setCssEnabled(false);
+        webClient.getOptions().setRedirectEnabled(true);
+        webClient.getOptions().setThrowExceptionOnScriptError(false);
+        webClient.getOptions().setTimeout(1000);
+        HtmlPage page = webClient.getPage(url);
+        System.out.println(page.asXml());
+        HtmlForm form = page.getFormByName("loginForm");
+        final HtmlSubmitInput button = form.getInputByName("submitBtn");
+        HtmlTextInput username = (HtmlTextInput) form.getInputByName("username");
+        HtmlPasswordInput password = (HtmlPasswordInput) form.getInputByName("password");
+        username.setValueAttribute(id);
+        password.setValueAttribute(mpassword);
+        HtmlPage retPage = (HtmlPage) button.click();
+        webClient.waitForBackgroundJavaScript(200);
+        System.out.println(retPage.asXml());
+        HtmlPage page1 = webClient.getPage("http://score.xaau.edu.cn/eams/courseTableForStd.action");
+        webClient.waitForBackgroundJavaScript(200);
+        HtmlPage page2 = webClient.getPage("http://score.xaau.edu.cn/eams/home.action");
+        webClient.waitForBackgroundJavaScript(200);
+        System.out.println(page2.asXml());
+        System.out.println(page1.asXml());
+        Set<Cookie> cookies1 = webClient.getCookieManager().getCookies();
+        for (Cookie c : cookies1) {
+            if (c.getName().equals("semester.id") ) {
+                cookie.add(c);
+            }
+            if (c.getName().equals("JSESSIONID") ) {
+                cookie.add(c);
+            }
+        }
+        webClient.getCookieManager().clearCookies();
+        webClient.close();
+        System.out.println("lttttt*************************************************");
+//            String TableHtml = page1.asXml();
+//            String userHtml = page2.asXml();
+//            timeTables = dataHandle(TableHtml, userHtml);  //解析数据
         return timeTables;
     }
 

@@ -1,5 +1,6 @@
 package com.neo.web;
 
+import com.gargoylesoftware.htmlunit.util.Cookie;
 import com.neo.OkHttp.CrawlPage;
 import com.neo.entity.TimeTable;
 import com.neo.repository.TableRepository;
@@ -13,12 +14,14 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 public class TableController {
 
     @Autowired
     private TableRepository tableRepository;
+    private Set<Cookie> cookie;
 
     /**
      * @param reqMap
@@ -55,7 +58,7 @@ public class TableController {
         List<TimeTable> timeTables = new ArrayList<>();
         CrawlPage crawl = new CrawlPage();
         try {
-            timeTables = crawl.crawlPageWithoutAnalyseJs("http://score.xaau.edu.cn/eams/localLogin.action",id, password);
+            timeTables = crawl.crawlPageWithoutAnalyseJs("http://score.xaau.edu.cn/eams/localLogin.action",id, password,cookie);
         } catch (Exception e) {
             e.printStackTrace();
         }
