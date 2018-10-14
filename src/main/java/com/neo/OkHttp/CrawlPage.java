@@ -61,6 +61,7 @@ public class CrawlPage {
         String userHtml = page2.asXml();
         timeTables = dataHandle(TableHtml, userHtml);  //解析数据
         return timeTables;
+
     }
 
     public List<TimeTable> dataHandle(String table, String user) {
