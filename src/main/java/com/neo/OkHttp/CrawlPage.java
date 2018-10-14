@@ -22,22 +22,16 @@ public class CrawlPage {
 
     @Autowired
     TableHandle tableHandle = new TableHandle();
+
     /**
      * 功能描述：抓取页面时不解析页面的js
      *
      * @param url
      * @throws Exception
      */
-    public List<TimeTable> crawlPageWithoutAnalyseJs(String url, String id, String mpassword, Set<Cookie> cookie) throws Exception {
+    public List<TimeTable> crawlPageWithoutAnalyseJs(String url, String id, String mpassword) throws Exception {
         List<TimeTable> timeTables = new ArrayList<TimeTable>();
         WebClient webClient = new WebClient(BrowserVersion.CHROME);
-        webClient.getCookieManager().setCookiesEnabled(true);
-        if (cookie != null) {
-            for (Cookie s:cookie) {
-            webClient.getCookieManager().addCookie(s);
-            }
-            cookie = null;
-        }
         webClient.getOptions().setJavaScriptEnabled(true);
         webClient.getOptions().setCssEnabled(false);
         webClient.getOptions().setRedirectEnabled(true);
@@ -60,21 +54,12 @@ public class CrawlPage {
         webClient.waitForBackgroundJavaScript(200);
         System.out.println(page2.asXml());
         System.out.println(page1.asXml());
-        Set<Cookie> cookies1 = webClient.getCookieManager().getCookies();
-        for (Cookie c : cookies1) {
-            if (c.getName().equals("semester.id") ) {
-                cookie.add(c);
-            }
-            if (c.getName().equals("JSESSIONID") ) {
-                cookie.add(c);
-            }
-        }
         webClient.getCookieManager().clearCookies();
         webClient.close();
         System.out.println("lttttt*************************************************");
-//            String TableHtml = page1.asXml();
-//            String userHtml = page2.asXml();
-//            timeTables = dataHandle(TableHtml, userHtml);  //解析数据
+        String TableHtml = page1.asXml();
+        String userHtml = page2.asXml();
+        timeTables = dataHandle(TableHtml, userHtml);  //解析数据
         return timeTables;
     }
 

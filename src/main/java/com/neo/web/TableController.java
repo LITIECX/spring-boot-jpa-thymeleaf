@@ -21,7 +21,7 @@ public class TableController {
 
     @Autowired
     private TableRepository tableRepository;
-    private Set<Cookie> cookie;
+
 
     /**
      * @param reqMap
@@ -58,7 +58,7 @@ public class TableController {
         List<TimeTable> timeTables = new ArrayList<>();
         CrawlPage crawl = new CrawlPage();
         try {
-            timeTables = crawl.crawlPageWithoutAnalyseJs("http://score.xaau.edu.cn/eams/localLogin.action",id, password,cookie);
+            timeTables = crawl.crawlPageWithoutAnalyseJs("http://score.xaau.edu.cn/eams/localLogin.action",id, password);
         } catch (Exception e) {
             e.printStackTrace();
         }
