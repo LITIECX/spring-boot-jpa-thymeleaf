@@ -7,4 +7,7 @@ package com.neo.web;
 public class test2Controller {
 
 
+    public String name;
+
+
 }
